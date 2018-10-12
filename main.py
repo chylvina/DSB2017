@@ -30,9 +30,13 @@ if not skip_prep:
 else:
     testsplit = os.listdir(datapath)
 
+print("nodmodel")
 nodmodel = import_module(config_submit['detector_model'].split('.py')[0])
+print("nodmodel.get_model()")
 config1, nod_net, loss, get_pbb = nodmodel.get_model()
+print("torch.load")
 checkpoint = torch.load(config_submit['detector_param'])
+print("nod_net.load_state_dict")
 nod_net.load_state_dict(checkpoint['state_dict'])
 
 torch.cuda.set_device(0)
@@ -49,20 +53,24 @@ if not skip_detect:
     margin = 32
     sidelen = 144
     config1['datadir'] = prep_result_path
+    print("split_comber")
     split_comber = SplitComb(sidelen,config1['max_stride'],config1['stride'],margin,pad_value= config1['pad_value'])
 
+    print("dataset")
     dataset = DataBowl3Detector(testsplit,config1,phase='test',split_comber=split_comber)
+    print("test_loader")
     test_loader = DataLoader(dataset,batch_size = 1,
-        shuffle = False,num_workers = 32,pin_memory=False,collate_fn =collate)
-
-    test_detect(test_loader, nod_net, get_pbb, bbox_result_path,config1,n_gpu=config_submit['n_gpu'])
+        shuffle = False,num_workers = 4,pin_memory=False,collate_fn =collate)
+    #print("test_detect")
+    #test_detect(test_loader, nod_net, get_pbb, bbox_result_path,config1,n_gpu=config_submit['n_gpu'])
 
     
 
-
+print("casemodel")
 casemodel = import_module(config_submit['classifier_model'].split('.py')[0])
 casenet = casemodel.CaseNet(topk=5)
 config2 = casemodel.config
+print("checkpoint")
 checkpoint = torch.load(config_submit['classifier_param'])
 casenet.load_state_dict(checkpoint['state_dict'])
 
@@ -104,4 +112,5 @@ config2['datadir'] = prep_result_path
 dataset = DataBowl3Classifier(testsplit, config2, phase = 'test')
 predlist = test_casenet(casenet,dataset).T
 df = pandas.DataFrame({'id':testsplit, 'cancer':predlist})
+print("write")
 df.to_csv(filename,index=False)

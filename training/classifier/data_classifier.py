@@ -34,6 +34,9 @@ class DataBowl3Classifier(Dataset):
         self.filenames = [os.path.join(datadir, '%s_clean.npy' % idx) for idx in idcs]
         labels = np.array(pandas.read_csv(config['labelfile']))
         if phase !='test':
+            for tmp in [labels[labels[:, 0] == f.split('-')[0].split('_')[0], 1] for f in split]:
+                print(tmp.shape)
+	    print([labels[labels[:,0]==f.split('-')[0].split('_')[0],1] for f in split])
             self.yset = np.array([labels[labels[:,0]==f.split('-')[0].split('_')[0],1] for f in split]).astype('int')
         idcs = [f.split('-')[0] for f in idcs]
         

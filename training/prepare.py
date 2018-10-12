@@ -276,6 +276,8 @@ def preprocess_luna():
 
         
         pool = Pool()
+	print filelist, luna_segment, luna_data, savepath
+	luna_segment = '/mnt/disk3/LUNA2016/data'
         partial_savenpy_luna = partial(savenpy_luna,annos=annos,filelist=filelist,
                                        luna_segment=luna_segment,luna_data=luna_data,savepath=savepath)
 
